@@ -1,5 +1,7 @@
 // reference: https://dc0d32.blogspot.com/2010/06/real-mode-in-c-with-gcc-writing.html
 /* XXX these must be at top */
+#include "kernel.h"
+#include "descriptor.h"
 __asm__(".code16gcc\n");
 __asm__ ("jmpl  $0, $main\n");
 
@@ -18,6 +20,13 @@ void    __NOINLINE __REGPARM print(const char   *s){
 /* and for everything else you can use C! Be it traversing the filesystem, or verifying the kernel image etc.*/
 
 void main(){
-    print("hello world!\r\n");
+        print("hello world!\r\n");
+        GDTR_FORMAT gdtr = {.base = GDT_BASE_ADDR, .limit = 23};
+
+     asm volatile("movl %0, %%eax\n\t"
+                   "movl %%eax, %%ds"
+             : 
+             :"i" (KERNEL_CODE_SEL) 
+             : "%eax");
     __asm__ __volatile__ ("hlt");
 }
