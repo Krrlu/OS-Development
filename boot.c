@@ -20,14 +20,15 @@ void    __NOINLINE __REGPARM print(const char   *s){
 /* and for everything else you can use C! Be it traversing the filesystem, or verifying the kernel image etc.*/
 
 void static inline readdisk(){
+                        // use int 13 BIOS interrupt
                         // ah = 0x2
                         // al = 0x3
                         // cl = 0x2
                         // ch = 0
                         // dh = 0
                         // dl = 0x80
-                        // bx = 
-                     
+                        // ex:bx = 4000:0000
+                        
         asm volatile("mov %0, %%ah\n\t"         
                      "mov %1, %%al\n\t"        
                      "mov %2, %%cl\n\t"         
@@ -47,13 +48,36 @@ void static inline readdisk(){
 void main(){
         print("hello world!\r\n");
         GDTR_FORMAT gdtr = {.base = GDT_BASE_ADDR, .limit = 23};
-        readdisk();
 
+        uint32_t *gdt_pointer = (uint32_t*)(GDT_BASE_ADDR + 0x8); // point to second entry in the GDT
 
-     asm volatile("movl %0, %%eax\n\t"
-                   "movl %%eax, %%ds"
-             : 
-             :"i" (KERNEL_CODE_SEL) 
+        readdisk(); // read from disk
+
+        *gdt_pointer = 0x0000ffff; //set up code segment descroptor 
+        *(gdt_pointer+1) = 0x00cf9800; // base = 0, limit = 4GB
+
+        *(gdt_pointer+2) = 0x0000ffff; //set up data segment descroptor 
+        *(gdt_pointer+3) = 0x00cf9200; // base = 0, limit = 4GB
+
+        __asm__ volatile("lgdt %0" :: "m" (gdtr));
+
+        __asm__ __volatile__ ("cli"); //clear interrupt flag
+
+        //enable A20
+        asm volatile("inb %0, %%al\n\t" //in al, 0x92
+                     "or %1, %%al\n\t"  //or al, 2
+                     "outb %%al, %0;"   //out 0x92, al
+             :
+             :"i" (0x92), "i"(0x2)
              : "%eax");
-    __asm__ __volatile__ ("hlt");
+
+        //set PE bit to enable protect mode
+        asm volatile("movl %%cr0, %%eax\n\t"
+                  "orl %0, %%eax\n\t"
+                  "movl %%eax, %%cr0"
+             :
+             :"i" (0x1)
+             : "%eax");
+        // jump to kernel
+        __asm__ ("jmpl  $0x8,$0x40000\n");
 }
