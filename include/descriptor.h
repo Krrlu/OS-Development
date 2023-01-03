@@ -3,4 +3,4 @@
 typedef struct GDTR_FORMAT{
     uint16_t limit;
     uint32_t base;
-} GDTR_FORMAT;
+}__attribute__((packed)) GDTR_FORMAT;

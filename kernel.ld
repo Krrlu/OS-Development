@@ -1,7 +1,7 @@
 ENTRY(main);
 SECTIONS
 {
-    . = 0x7C00;
+    . = 0x40000;
     .text : AT(0x40000)
     {
         _text = .;
@@ -18,10 +18,6 @@ SECTIONS
         *(COMMON)
         _data_end = .;
     }
-    .sig : AT(0x7DFE)
-    {
-        SHORT(0xaa55);
-    }
     /DISCARD/ :
     {
         *(.note*);
@@ -29,6 +25,5 @@ SECTIONS
         *(.igot*);
         *(.rel*);
         *(.comment);
-/* add any unwanted sections spewed out by your version of gcc and flags here */
     }
 }
