@@ -10,8 +10,8 @@ all: boot.bin kernel.bin
 boot.elf: boot.o
 	$(LD) -static -T linker.ld -nostdlib -o boot.elf boot.o
 
-kernel.elf: kernel.o
-	$(LD) -static -T kernel.ld -nostdlib -o kernel.elf kernel.o
+kernel.elf: kernel.o print.o
+	$(LD) -static -T kernel.ld -nostdlib -o kernel.elf $^
 
 %.bin: %.elf 
 	objcopy -O binary $< $@
