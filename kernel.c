@@ -1,20 +1,20 @@
 #include "kernel.h"
-__asm__ ("jmpl  $0x8,$main\n");
+#include "print.h"
+__asm__ ("jmpl  $0x8,$initialize\n");
 
+void initialize(){
+        asm volatile("mov %%ax, %%ds\n\t"
+                     "mov %%ax, %%es\n\t"
+                     "mov %%ax, %%gs\n\t"
+                     "mov %%ax, %%fs\n\t"
+                     "mov %%ax, %%ss\n\t"
+        ::"a"(KERNEL_DATA_SEL):); //load segment register
+        asm volatile("mov %0, %%esp"::"i"(0x7000):); //set esp
+        // jump to main
+        __asm__ ("jmpl  $0x8,$main\n");
+}
 void main(){
-    asm volatile("mov %%ax, %%ds"::"a"(KERNEL_DATA_SEL):); //load ds register
-    asm volatile("mov %0, %%esp"::"i"(0x7000):); //load ds register
     
-    char *p = (char*)0xb8000;
-    *p = 'H';
-    *(p+1) = 7;
-    *(p+2) = 'e';
-    *(p+3) = 7;
-    *(p+4) = 'l';
-    *(p+5) = 7;
-    *(p+6) = 'l';
-    *(p+7) = 7;
-    *(p+8) = 'o';
-    *(p+9) = 7;
+    print_char('h');
     __asm__ __volatile__ ("hlt");
 }
