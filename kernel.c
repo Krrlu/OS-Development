@@ -3,6 +3,7 @@ __asm__ ("jmpl  $0x8,$main\n");
 
 void main(){
     asm volatile("mov %%ax, %%ds"::"a"(KERNEL_DATA_SEL):); //load ds register
+    asm volatile("mov %0, %%esp"::"i"(0x7000):); //load ds register
     
     char *p = (char*)0xb8000;
     *p = 'H';
