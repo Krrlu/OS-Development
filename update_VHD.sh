@@ -1,4 +1,4 @@
 #!/bin/bash
 
-dd if=boot.bin of=/media/sf_asm/learn.vhd bs=512 count=1 conv=notrunc #update bootloader(ignore the file location)
-dd if=kernel.bin of=/media/sf_asm/learn.vhd bs=512 count=3 seek=1 conv=notrunc
+dd if=boot.bin of=$1 bs=512 count=1 conv=notrunc #update bootloader
+dd if=kernel.bin of=$1 bs=512 count=3 seek=1 conv=notrunc #update kernel
