@@ -31,7 +31,7 @@ void print_string(char* s){
         pos = ((pos / VGA_WIDTH) + 1) * VGA_WIDTH;
     }else{
         *(buffer + (pos << 1)) = *s; //character
-        *(buffer + (pos << 1) + 1) = TEXT_ATTRIBUTE;
+        *(buffer + (pos << 1) + 1) = CHARACTER_ATTRIBUTE;
     pos++;
     }
     s++;
@@ -47,7 +47,7 @@ void print_char(char c){
         pos = ((pos / VGA_WIDTH) + 1) * VGA_WIDTH;
     }else{
         *(buffer + (pos << 1)) = c; //character
-        *(buffer + (pos << 1) + 1) = TEXT_ATTRIBUTE;
+        *(buffer + (pos << 1) + 1) = CHARACTER_ATTRIBUTE;
     pos++;
     }
     set_cursor(pos);
