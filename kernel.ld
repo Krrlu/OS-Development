@@ -6,24 +6,17 @@ SECTIONS
     {
         _text = .;
         *(.text);
-        _text_end = .;
     }
     .data : AT( ADDR(.text) + SIZEOF(.text) )
     {
         _data = .;
-        *(.bss);
-        *(.bss*);
         *(.data);
-        *(.rodata*);
-        *(COMMON)
-        _data_end = .;
     }
-    /DISCARD/ :
+     .bss : AT( ADDR(.text) + SIZEOF(.text) + SIZEOF(.data) )
     {
-        *(.note*);
-        *(.iplt*);
-        *(.igot*);
-        *(.rel*);
-        *(.comment);
-    }
+  	    bss = .;
+  	    *(.bss)
+        *(COMMON)
+  }
+    
 }
