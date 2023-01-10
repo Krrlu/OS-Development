@@ -1,6 +1,9 @@
 #include <sys/io.h>
 #include <stdint.h>
 #include "print.h"
+#define VGA_BUFFER (char*)0xb8000
+#define VGA_WIDTH 80 
+#define CHARACTER_ATTRIBUTE 7
 
 uint16_t static inline get_cursor_position(){
     uint16_t pos = 0;
