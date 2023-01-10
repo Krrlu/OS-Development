@@ -1,4 +1,5 @@
 #include "mmu.h"
+#include "print.h"
 #define ALIGNMENT 32 //must be mutiple of 2
 #define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~(ALIGNMENT-1))
 #define HEAP 0x0100000
@@ -20,7 +21,7 @@ void* malloc(uint32_t size) {
 	char* p2 = p1;
 	// we use two pointer
 
-	while ((uint32_t)(p1) < 0xffffffff) {
+	while (p1) {
 		blocks = ((uint32_t)ALIGN(size + 4) / ALIGNMENT);
 		// find first block that is not used
 		while ((*((uint32_t*)p1) & 1) == 1) {
@@ -36,7 +37,10 @@ void* malloc(uint32_t size) {
 		if (!blocks) break; // we found enough blocks
 		p1 = p2;
 	}
-	if (blocks) return NULL; // not enough memory to allocate 
+	if (blocks){
+		print_string("error, allocating memory");
+		return NULL;
+	} // not enough memory to allocate 
 
 	*(uint32_t*) p1 |= 1; // set first bit 1
 	*(uint32_t*) p1 |= (uint32_t)ALIGN(size + 4); // store the size of chunk in rest 31 bits
