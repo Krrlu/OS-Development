@@ -1,7 +1,7 @@
 #include "mmu.h"
 #define ALIGNMENT 32 //must be mutiple of 2
 #define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~(ALIGNMENT-1))
-char* heap = 0x0100000; // start adress of heap
+#define HEAP 0x0100000
 
 /*
     Memory management unit
@@ -14,13 +14,13 @@ char* heap = 0x0100000; // start adress of heap
 //The rest 15 bits is the size of the block
 void* malloc(uint32_t size) {
 
-	
+	char* heap = (char*) HEAP; // start adress of heap
 	int blocks = ((uint32_t)ALIGN(size + 4) / ALIGNMENT);//number of blocks we need
 	char* p1 = heap;
 	char* p2 = p1;
 	// we use two pointer
 
-	while (p1 < 0xffffffff) {
+	while ((uint32_t)(p1) < 0xffffffff) {
 		blocks = ((uint32_t)ALIGN(size + 4) / ALIGNMENT);
 		// find first block that is not used
 		while ((*((uint32_t*)p1) & 1) == 1) {
