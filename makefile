@@ -10,7 +10,7 @@ all: boot.bin kernel.bin
 boot.elf: boot.o
 	$(LD) -static -T linker.ld -nostdlib -o boot.elf boot.o
 
-kernel.elf: kernel.o print.o
+kernel.elf: kernel.o print.o mmu.o io.o
 	$(LD) -static -T kernel.ld -nostdlib -o kernel.elf $^
 
 %.bin: %.elf 
