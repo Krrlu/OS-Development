@@ -1,10 +1,14 @@
 #include <sys/io.h>
 #include <stdint.h>
 #include "io.h"
-// read  from disk
-// uint32_t lba: number of lba
-// char* buffer: adress where data will be stored
-// unsigned char sectors: number of sector to read
+/**
+ * Read  from disk
+ *
+ * @param lba LBA number
+ * @param buffer Adress where data will be stored
+ * @param sectors Number of sector to read
+ */
+
 void read_disk(uint32_t lba, uint16_t* buffer, unsigned char sectors) {
 
     outb(sectors,0x1f2); // number of sector to read

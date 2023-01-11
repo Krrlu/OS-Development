@@ -16,7 +16,15 @@ void initialize_reg(){
         __asm__ ("jmpl  $0x8,$main\n");
 }
 
-// construct a gate descriptor with provided paramater
+
+/**
+ * Construct a gate descriptor
+ *
+ * @param selector Segment selector
+ * @param attribute Attribute of gate descriptor
+ * @param offset adress of interrupt handle
+ */
+
 GateDescriptor construct_gate_descriptor(selector s, uint8_t attribute, uint32_t offset){
     GateDescriptor d;
     d.offset_1 = (uint16_t)(offset & 0xffff);
@@ -26,6 +34,10 @@ GateDescriptor construct_gate_descriptor(selector s, uint8_t attribute, uint32_t
     d.type_attributes = attribute;
     return d;
 }
+
+/**
+ * Initializing IDT
+ */
 
 void initialize_idt(){
     LIDT_Format idt; 

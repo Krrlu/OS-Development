@@ -4,15 +4,14 @@
 #define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~(ALIGNMENT-1))
 #define HEAP 0x0100000
 
-/*
-    Memory management unit
+/**
+*   Memory management unit
+*	Divide memory into blocks, size of block is aligned to macro ALIGNMENT. 
+*	Each block has a 16 bits header. First bit in header indicate whether the block is used of not
+*	1 for used and 0 for free
+*	The rest 15 bits store the size of the block
 */
 
-
-//Divide memory into blocks, size of block is aligned to macro ALIGNMENT. 
-//Each block has a 16 bits header. First bit in header indicate whether the block is used of not
-//1 for used and 0 for free
-//The rest 15 bits is the size of the block
 void* malloc(uint32_t size) {
 
 	char* heap = (char*) HEAP; // start adress of heap
