@@ -1,5 +1,5 @@
 #include "kernel.h"
-
+#include "descriptor.h"
 #define IDT_BASE_ADDR 0x1F000
 
 __asm__ ("jmpl  $0x8,$initialize_reg\n");
