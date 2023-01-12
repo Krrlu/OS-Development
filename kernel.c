@@ -46,9 +46,10 @@ void initialize_idt(){
     idt.base = IDT_BASE_ADDR;
     idt.limit = 256*8-1; //256 interrupts
 
-    idtp[0] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)isr0);
-    idtp[6] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)isr6);
-    idtp[13] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)isr6);
+    idtp[0] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)interrupt_handler_0);
+    idtp[6] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)interrupt_handler_6);
+    idtp[13] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)interrupt_handler_6);
+    idtp[55] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)interrupt_handler_55);
     __asm__ __volatile__("LIDT %0" :: "m" (idt));
     //print_string("IDT initialization complete");
 }
@@ -56,7 +57,11 @@ void initialize_idt(){
 void main(){
     // initialize IDT
     initialize_idt();
-
+    
+    // test system call
+    asm volatile("xor  %%eax,%%eax\n"
+                 "int %0"
+        ::"i"(55):);
     
     __asm__ __volatile__ ("hlt");
 }

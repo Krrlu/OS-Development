@@ -1,6 +1,6 @@
 CC = i686-elf-gcc
 LD = i686-elf-ld
-CFLAGS = -c -g -Os -march=i686 -ffreestanding -Wall -I ./include -std=gnu17
+CFLAGS = -c -g -Os -march=i686 -ffreestanding -Wall -I ./include -std=gnu17 -mgeneral-regs-only
 
 all: boot.bin kernel.bin
 
