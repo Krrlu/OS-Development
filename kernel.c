@@ -47,13 +47,16 @@ void initialize_idt(){
     idt.limit = 256*8-1; //256 interrupts
 
     idtp[0] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)isr0);
-    //idtp[33] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)isr0);
+    idtp[6] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)isr6);
+    idtp[13] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)isr6);
     __asm__ __volatile__("LIDT %0" :: "m" (idt));
+    //print_string("IDT initialization complete");
 }
 
 void main(){
     // initialize IDT
     initialize_idt();
+
     
     __asm__ __volatile__ ("hlt");
 }
