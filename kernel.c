@@ -1,7 +1,7 @@
 #include "kernel.h"
 #include "descriptor.h"
+#include "print.h"
 #define IDT_BASE_ADDR 0x1F000
-
 __asm__ ("jmpl  $0x8,$initialize_reg\n");
 
 void initialize_reg(){
@@ -54,14 +54,13 @@ void initialize_idt(){
     //print_string("IDT initialization complete");
 }
 
-void main(){
+void __attribute__((noreturn)) main(){
     // initialize IDT
     initialize_idt();
     
-    // test system call
-    asm volatile("xor  %%eax,%%eax\n"
-                 "int %0"
-        ::"i"(55):);
+    print_hex(0x12345678);
     
-    __asm__ __volatile__ ("hlt");
+
+        hlt();
+        for(;;);
 }

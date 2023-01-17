@@ -1,9 +1,11 @@
 #include <sys/io.h>
-#include <stdint.h>
 #include "print.h"
 #define VGA_BUFFER (char*)0xb8000
 #define VGA_WIDTH 80 
 #define CHARACTER_ATTRIBUTE 7
+
+static const char* lookup_hex = "0123456789abcdef";
+
 
 uint16_t static inline get_cursor_position(){
     uint16_t pos = 0;
@@ -54,4 +56,20 @@ void print_char(char c){
     pos++;
     }
     set_cursor(pos);
+}
+
+/**
+ * Print a number in hex decimal
+ */
+
+void print_hex(uint32_t n){
+    char nums[9];
+    for(int i = 7; i >=0; i--){
+        nums[i] = lookup_hex[n & 0xf];
+        n >>= 4;
+    }
+    nums[8] = '\0'; // end of string
+    print_string("0x");
+    print_string(nums);
+    print_char('\n');
 }
