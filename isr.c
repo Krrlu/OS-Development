@@ -1,6 +1,6 @@
 #include "print.h"
 #include "isr.h"
-#define hlt() asm volatile("cld\n\t" "hlt\n\t":::)
+#define hlt() asm volatile("cli\n\t" "hlt\n\t":::)
 /*
     This file contain Interrupt Service Routine
 */

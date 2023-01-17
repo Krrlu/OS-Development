@@ -8,4 +8,4 @@
 #define USER_DATA_SEL 0x1E
 #define KERNEL_BASE_ADDR 0x4000
 
-#define hlt() asm volatile("cld\n\t" "hlt\n\t":::)
+#define hlt() asm volatile("cli\n\t" "hlt\n\t":::)
