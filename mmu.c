@@ -51,7 +51,11 @@ void free(char* p) {
 	if (p == NULL) return; //Null pointer
 
 	p -= 4; // p point to begin of the header
-	if (((*p & 1) == 0)) return; // if memory is not used
+
+
+	if (((*p & 1) == 0)) {
+		print_string("error, free memory that is not allocated");
+	}// if memory is not used
 
 	uint32_t blocks = (*(uint32_t*)p) / ALIGNMENT;
 	// use for loop to clean every possible header in this chunk

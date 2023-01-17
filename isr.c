@@ -1,21 +1,22 @@
 #include "print.h"
 #include "isr.h"
+#define hlt() asm volatile("cld\n\t" "hlt\n\t":::)
 /*
     This file contain Interrupt Service Routine
 */
 __attribute__((interrupt)) void interrupt_handler_0(interrupt_frame* frame){
     print_string("Error, divide by zero");
-    __asm__ __volatile__ ("hlt");
+    hlt();
 }
 
 __attribute__((interrupt)) void interrupt_handler_6(interrupt_frame* frame){
     print_string("Error, invalid Opcode");
-    __asm__ __volatile__ ("hlt");
+    hlt();
 }
 
 __attribute__((interrupt)) void interrupt_handler_13(interrupt_frame* frame){
     print_string("error, general protection");
-    __asm__ __volatile__ ("hlt");
+    hlt();
 }
 
 /**
@@ -48,5 +49,4 @@ __attribute__((interrupt)) void interrupt_handler_55(interrupt_frame* frame){
         default:
             print_string("Error! unknown system call number");
     }
-    //__asm__ __volatile__ ("hlt");
 }
