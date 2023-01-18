@@ -21,7 +21,7 @@ void    __NOINLINE __REGPARM print(const char   *s){
 
 void static inline readdisk(){
                         // use int 13 BIOS interrupt
-                        // ah = 0x2
+                        // ah = 0xff
                         // al = 0x3
                         // cl = 0x2
                         // ch = 0
@@ -47,17 +47,20 @@ void static inline readdisk(){
 
 void main(){
         //print("hello world!\r\n");
-        GDTR_FORMAT gdtr = {.base = GDT_BASE_ADDR, .limit = 23};
+        GDTR_FORMAT gdtr = {.base = GDT_BASE_ADDR, .limit = 799}; // 100 descroptors
 
         uint32_t *gdt_pointer = (uint32_t*)(GDT_BASE_ADDR + 0x8); // point to second entry in the GDT
 
         readdisk(); // read from disk
 
-        *gdt_pointer = 0x0000ffff; //set up code segment descroptor 
+        *gdt_pointer = 0x0000ffff; //set up kernel code segment descroptor 
         *(gdt_pointer+1) = 0x00cf9800; // base = 0, limit = 4GB
 
-        *(gdt_pointer+2) = 0x0000ffff; //set up data segment descroptor 
+        *(gdt_pointer+2) = 0x0000ffff; //set up kernel data segment descroptor 
         *(gdt_pointer+3) = 0x00cf9200; // base = 0, limit = 4GB
+
+        *(gdt_pointer+4) = 0x0000ffff; //set up user code segment descroptor 
+        *(gdt_pointer+5) = 0x00cff800; // base = 0, limit = 4GB privilege leve 3
 
         __asm__ volatile("lgdt %0" :: "m" (gdtr));
 

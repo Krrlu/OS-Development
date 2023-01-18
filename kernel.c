@@ -18,6 +18,18 @@ void initialize_reg(){
         __asm__ ("jmpl  $0x8,$main\n");
 }
 
+/**
+ * kernel panic function
+ *
+ * @param message message for panic
+ */
+
+void panic(char* message){
+    print_string("kernel panic: ");
+    print_string(message);
+    hlt();
+}
+
 
 /**
  * Construct a gate descriptor
@@ -59,12 +71,38 @@ SegmentDescriptor construct_seg_descriptor(uint32_t base_addr, uint32_t limit, u
 /**
  * install a descriptor to GDT
  *
- * @param descriptor descriptor that will add to GDT
+ * @param descriptor Pointer to the descriptor that will add to GDT
  * 
  */
 
-void install_descriptor(uint64_t descriptor){
+void install_descriptor(SegmentDescriptor* descriptor){
+    LIDT_Format volatile LIDT_buffer = {};
+    selector sel;
 
+    asm ("sgdt %0"::"m"(LIDT_buffer):);
+
+    // p point to the second descriptor in GDT 
+    char *p = 8 + (char*)LIDT_buffer.base;
+    
+    // (LIDT_buffer.limit + 1 ) >> 3 = (LIDT_buffer.limit + 1 ) / 8 = maximum number of descriptor in GDT
+    int i = 1;
+    for(; i < (LIDT_buffer.limit + 1 ) >> 3; i++){
+        // check the present flag in descriptor
+        if(!(*(p + 5) & 0x80)) goto desfound;
+        // next descriptor
+        p += 8;
+    }
+    panic("Not enough space in GDT");
+
+    desfound:
+
+    //add the descriptor to GDT
+    *(SegmentDescriptor*) p =  *descriptor;
+
+    //make segment selector
+    sel = i << 3; // i is the index of descriptor in GDT
+    
+    asm ("ltr %0"::"r"(sel):);
 }
 
 /**
@@ -100,9 +138,9 @@ void initialize_kernel_tss(){
         ::"%eax"); 
 
     kernel_tss.T = 0;
-
+ 
     SegmentDescriptor t = construct_seg_descriptor((uint32_t)&kernel_tss,0x67,ATTRIBUTE_TSS_DESCRIPTOR);
-
+    install_descriptor(&t);
 }
 
 void __attribute__((noreturn)) main(){
