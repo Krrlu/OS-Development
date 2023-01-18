@@ -4,6 +4,8 @@
 #define IDT_BASE_ADDR 0x1F000
 __asm__ ("jmpl  $0x8,$initialize_reg\n");
 
+static tss kernel_tss;
+
 void initialize_reg(){
         asm volatile("mov %%ax, %%ds\n\t"
                      "mov %%ax, %%es\n\t"
@@ -30,9 +32,39 @@ GateDescriptor construct_gate_descriptor(selector s, uint8_t attribute, uint32_t
     d.offset_1 = (uint16_t)(offset & 0xffff);
     d.offset_2 = (uint16_t)((offset >> 16) & 0xffff);
     d.selector = s;
-    d.reserved = 0;
+    d.paramater = 0; 
     d.type_attributes = attribute;
     return d;
+}
+
+/**
+ * Construct a segment descriptor
+ *
+ * @param base_addr Base adress of segment
+ * @param limit Size of segment
+ * @param attribute Bits 32 - 63 of descriptor. Bits that correspond to attributes of descriptor are set
+ *                  Bits correspond base and limit are all zero
+ */
+
+SegmentDescriptor construct_seg_descriptor(uint32_t base_addr, uint32_t limit, uint32_t attribute){
+    SegmentDescriptor d;
+    d.limit_1 = (uint16_t) limit & 0xffff;
+    d.base_address1 = (uint16_t) base_addr & 0xffff;
+    d.base_address2 = (uint8_t) ((base_addr >> 16) & 0xff);
+    d.type_attributes = (uint8_t) ((attribute >> 8) & 0xff);
+    d.limit_2 = (uint8_t) ((limit >> 16) & 0xf) | (uint8_t) (attribute >> 16);
+    return d;
+}
+
+/**
+ * install a descriptor to GDT
+ *
+ * @param descriptor descriptor that will add to GDT
+ * 
+ */
+
+void install_descriptor(uint64_t descriptor){
+
 }
 
 /**
@@ -54,13 +86,36 @@ void initialize_idt(){
     //print_string("IDT initialization complete");
 }
 
+/**
+ * Initializing TSS for kernel
+ */
+
+void initialize_kernel_tss(){
+    kernel_tss.previous_task_link = 0;
+
+    //save cr3 to tss
+    asm ("mov %%cr3, %%eax\n\t"
+         "mov %%eax, %0\n\t"
+        :"=r"(kernel_tss.cr3)
+        ::"%eax"); 
+
+    kernel_tss.T = 0;
+
+    SegmentDescriptor t = construct_seg_descriptor((uint32_t)&kernel_tss,0x67,ATTRIBUTE_TSS_DESCRIPTOR);
+
+}
+
 void __attribute__((noreturn)) main(){
     // initialize IDT
     initialize_idt();
     
-    print_hex(0x12345678);
-    
+    //test
+    initialize_kernel_tss();
 
-        hlt();
-        for(;;);
+    //test system call
+    asm ("xor %%eax, %%eax\n\t"
+      "int %0"::"i"(55):"%eax"); 
+
+    hlt();
+    for(;;);
 }
