@@ -3,6 +3,8 @@
 #include "io.h"
 #include "isr.h"
 
+void panic(char* message);
+
 #define KERNEL_CODE_SEL 0x8
 #define KERNEL_DATA_SEL 0x10
 #define USER_DATA_SEL 0x1E

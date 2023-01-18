@@ -4,6 +4,8 @@
 #define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~(ALIGNMENT-1))
 #define HEAP 0x0100000
 
+void panic(char* message);
+
 /**
 *   Memory management unit
 *	Divide memory into blocks, size of block is aligned to macro ALIGNMENT. 
@@ -54,7 +56,7 @@ void free(char* p) {
 
 
 	if (((*p & 1) == 0)) {
-		print_string("error, free memory that is not allocated");
+		panic("error, free memory that is not allocated");
 	}// if memory is not used
 
 	uint32_t blocks = (*(uint32_t*)p) / ALIGNMENT;
