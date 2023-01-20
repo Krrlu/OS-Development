@@ -10,7 +10,7 @@ typedef uint16_t selector;
 typedef struct{
     uint16_t limit;
     uint32_t base;
-}__attribute__((packed)) GDTR_FORMAT, LIDT_Format;
+}__attribute__((packed)) GDTR_Format, LIDT_Format;
 
 typedef struct{
     uint16_t offset_1;        // offset bits 0..15

@@ -75,18 +75,18 @@ SegmentDescriptor construct_seg_descriptor(uint32_t base_addr, uint32_t limit, u
  * 
  */
 
-void install_descriptor(SegmentDescriptor* descriptor){
-    LIDT_Format volatile LIDT_buffer = {};
+selector install_descriptor(SegmentDescriptor* descriptor){
+    GDTR_Format volatile GDTR_buffer = {};
     selector sel;
 
-    asm ("sgdt %0"::"m"(LIDT_buffer):);
+    asm ("sgdt %0"::"m"(GDTR_buffer):);
 
     // p point to the second descriptor in GDT 
-    char *p = 8 + (char*)LIDT_buffer.base;
+    char *p = 8 + (char*)GDTR_buffer.base;
     
-    // (LIDT_buffer.limit + 1 ) >> 3 = (LIDT_buffer.limit + 1 ) / 8 = maximum number of descriptor in GDT
+    // (GDTR_buffer.limit + 1 ) >> 3 = (GDTR_buffer.limit + 1 ) / 8 = maximum number of descriptor in GDT
     int i = 1;
-    for(; i < (LIDT_buffer.limit + 1 ) >> 3; i++){
+    for(; i < (GDTR_buffer.limit + 1 ) >> 3; i++){
         // check the present flag in descriptor
         if(!(*(p + 5) & 0x80)) goto desfound;
         // next descriptor
@@ -102,7 +102,7 @@ void install_descriptor(SegmentDescriptor* descriptor){
     //make segment selector
     sel = i << 3; // i is the index of descriptor in GDT
     
-    asm ("ltr %0"::"r"(sel):);
+    return sel;
 }
 
 /**
@@ -140,7 +140,8 @@ void initialize_kernel_tss(){
     kernel_tss.T = 0;
  
     SegmentDescriptor t = construct_seg_descriptor((uint32_t)&kernel_tss,0x67,ATTRIBUTE_TSS_DESCRIPTOR);
-    install_descriptor(&t);
+    selector s = install_descriptor(&t);
+    asm ("ltr %0"::"r"(s):);
 }
 
 void __attribute__((noreturn)) main(){

@@ -47,7 +47,7 @@ void static inline readdisk(){
 
 void main(){
         //print("hello world!\r\n");
-        GDTR_FORMAT gdtr = {.base = GDT_BASE_ADDR, .limit = 799}; // 100 descroptors
+        GDTR_Format gdtr = {.base = GDT_BASE_ADDR, .limit = 799}; // 100 descroptors
 
         uint32_t *gdt_pointer = (uint32_t*)(GDT_BASE_ADDR + 0x8); // point to second entry in the GDT
 
