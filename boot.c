@@ -1,7 +1,6 @@
 // reference: https://dc0d32.blogspot.com/2010/06/real-mode-in-c-with-gcc-writing.html
 /* XXX these must be at top */
 #include "kernel.h"
-#include "descriptor.h"
 __asm__(".code16gcc\n");
 __asm__ ("jmpl  $0, $main\n");
 
@@ -21,8 +20,8 @@ void    __NOINLINE __REGPARM print(const char   *s){
 
 void static inline readdisk(){
                         // use int 13 BIOS interrupt
-                        // ah = 0xff
-                        // al = 0x3
+                        // ah = 0x2
+                        // al = 0x4f
                         // cl = 0x2
                         // ch = 0
                         // dh = 0
@@ -40,12 +39,12 @@ void static inline readdisk(){
                      "xor %%bx, %%bx\n\t"     
                      "int %5"
              : 
-             :"i" (0x2), "i" (0x3), "i"(0x2), "i" (0x80), "i" (0x4000), "i"(0x13)
+             :"i" (0x2), "i" (0x4f), "i"(0x2), "i" (0x80), "i" (0x4000), "i"(0x13)
              : "%eax","%ecx","%ebx","%edx");
 
 }
 
-void main(){
+void __NORETURN main(){
         //print("hello world!\r\n");
         GDTR_Format gdtr = {.base = GDT_BASE_ADDR, .limit = 799}; // 100 descroptors
 
@@ -83,4 +82,5 @@ void main(){
              : "%eax");
         // jump to kernel
         __asm__ ("jmpl  $0x8,$0x40000\n");
+        for(;;);
 }
