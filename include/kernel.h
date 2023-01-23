@@ -1,8 +1,6 @@
-#include "print.h"
-#include "mmu.h"
-#include "io.h"
-#include "isr.h"
+#include "descriptor.h"
 
+SegmentDescriptor construct_seg_descriptor(uint32_t base_addr, uint32_t limit, uint32_t attribute);
 void panic(char* message);
 
 #define KERNEL_CODE_SEL 0x8

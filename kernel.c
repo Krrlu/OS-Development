@@ -1,10 +1,14 @@
 #include "kernel.h"
-#include "descriptor.h"
+#include "task.h"
 #include "print.h"
+#include "mmu.h"
+#include "io.h"
+#include "isr.h"
 #define IDT_BASE_ADDR 0x1F000
 __asm__ ("jmpl  $0x8,$initialize_reg\n");
 
 static tss kernel_tss;
+struct task kernel_task;
 
 void initialize_reg(){
         asm volatile("mov %%ax, %%ds\n\t"
@@ -128,7 +132,8 @@ void initialize_idt(){
  * Initializing TSS for kernel
  */
 
-void initialize_kernel_tss(){
+void initialize_kernel_task(){
+    // obtain TSS
     kernel_tss.previous_task_link = 0;
 
     //save cr3 to tss
@@ -142,6 +147,13 @@ void initialize_kernel_tss(){
     SegmentDescriptor t = construct_seg_descriptor((uint32_t)&kernel_tss,0x67,ATTRIBUTE_TSS_DESCRIPTOR);
     selector s = install_descriptor(&t);
     asm ("ltr %0"::"r"(s):);
+
+    // create task
+    kernel_task.id = 0;
+    kernel_task.prev = NULL;
+    kernel_task.next = NULL;
+    kernel_task.tss_sele = s;
+    
 }
 
 void __attribute__((noreturn)) main(){
@@ -149,11 +161,10 @@ void __attribute__((noreturn)) main(){
     initialize_idt();
     
     //test
-    initialize_kernel_tss();
+    initialize_kernel_task();
 
-    //test system call
-    asm ("xor %%eax, %%eax\n\t"
-      "int %0"::"i"(55):"%eax"); 
+    create_task(50);
+
 
     hlt();
     for(;;);
