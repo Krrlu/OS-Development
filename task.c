@@ -67,11 +67,42 @@ void create_task(int32_t lba){
     
     SegmentDescriptor temp_tss = construct_seg_descriptor((uint32_t)task_tss,SIZE_TSS,ATTRIBUTE_TSS_DESCRIPTOR);
     user_task->tss_sele = install_descriptor(&temp_tss);
-    
-    // ljmpl = jmp far [memory] 
-    asm ("ljmpl %0"
-        :
-        :"m"(user_task->padding):); 
 
+    // append user_task to the task linklist
+    struct task* p = &kernel_task;
+    while(p->next != NULL) p = p->next;
+    p->next = user_task;
+    user_task->prev = p;
+    user_task->id = p->id + 1;
+    user_task->busy = 0;
+}
+
+/**
+ *  task_switch() first find a avaiable task and the busy task in the task link,
+ *  then set the busy task to avaiable and switch to the new task
+ * 
+ */
+
+void task_switch(){
+    struct task* busy_task = NULL;
+    struct task* avaiable_task = NULL;
+    struct task* p = &kernel_task;
+
+    // find tasks in task link
+    while(p != NULL && (busy_task == NULL || avaiable_task == NULL) ){
+        if(busy_task == NULL && p->busy == 1) busy_task = p;
+        if(avaiable_task == NULL && p->busy == 0) avaiable_task = p;
+        p = p->next;
+    }
+
+    if(busy_task == NULL) panic("Cannot find a busy task");
+
+    //set busy task to avaiable and avaiable task to busy
+    busy_task->busy = 0;
+    avaiable_task->busy = 1;
+
+    // task switching, jump to the memory contain TSS selector
+    // ljmpl = jmp far [memory] 
+    asm ("ljmpl %0"::"m"(avaiable_task->padding):); 
 
 }
