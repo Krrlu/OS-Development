@@ -1,10 +1,10 @@
 #include <stdint.h>
 #define GDT_BASE_ADDR 0x8000
 #define ATTRIBUTE_INTERRUPT_DESCRIPTOR (uint8_t)0x8e // interrupt gate, dpl 0, present
-
-#define ATTRIBUTE_TSS_DESCRIPTOR (uint32_t)0x00008900 // interrupt gate, dpl 0, present
-
-
+#define ATTRIBUTE_TSS_DESCRIPTOR (uint32_t)0x00008900 // tss descriptor, dpl 0, present
+#define ATTRIBUTE_DATA_DESCRIPTOR_RING0 (uint32_t)0x00c09200 // data segment, dpl 0, present, 4KB granularity
+#define ATTRIBUTE_DATA_DESCRIPTOR_RING3 (uint32_t)0x00c0f200 // data segment, dpl 3, present, 4KB granularity
+#define SIZE_TSS 0x67
 typedef uint16_t selector;
 
 typedef struct{

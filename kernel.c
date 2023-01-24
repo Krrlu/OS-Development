@@ -1,4 +1,3 @@
-#include "kernel.h"
 #include "task.h"
 #include "print.h"
 #include "mmu.h"
@@ -80,10 +79,10 @@ SegmentDescriptor construct_seg_descriptor(uint32_t base_addr, uint32_t limit, u
  */
 
 selector install_descriptor(SegmentDescriptor* descriptor){
-    GDTR_Format volatile GDTR_buffer = {};
+    GDTR_Format GDTR_buffer = {};
     selector sel;
 
-    asm ("sgdt %0"::"m"(GDTR_buffer):);
+    asm ("sgdt %0"::"m"(GDTR_buffer):"memory");
 
     // p point to the second descriptor in GDT 
     char *p = 8 + (char*)GDTR_buffer.base;
@@ -105,6 +104,7 @@ selector install_descriptor(SegmentDescriptor* descriptor){
 
     //make segment selector
     sel = i << 3; // i is the index of descriptor in GDT
+
     
     return sel;
 }
@@ -123,7 +123,8 @@ void initialize_idt(){
     idtp[0] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)interrupt_handler_0);
     idtp[6] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)interrupt_handler_6);
     idtp[13] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)interrupt_handler_6);
-    idtp[55] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR,(uint32_t)interrupt_handler_55);
+    // set the dpl of int 55 to 3, then user program with cpl = 3 can access it
+    idtp[55] = construct_gate_descriptor(KERNEL_CODE_SEL,ATTRIBUTE_INTERRUPT_DESCRIPTOR | 0x60,(uint32_t)interrupt_handler_55);
     __asm__ __volatile__("LIDT %0" :: "m" (idt));
     //print_string("IDT initialization complete");
 }
@@ -144,7 +145,7 @@ void initialize_kernel_task(){
 
     kernel_tss.T = 0;
  
-    SegmentDescriptor t = construct_seg_descriptor((uint32_t)&kernel_tss,0x67,ATTRIBUTE_TSS_DESCRIPTOR);
+    SegmentDescriptor t = construct_seg_descriptor((uint32_t)&kernel_tss,SIZE_TSS,ATTRIBUTE_TSS_DESCRIPTOR);
     selector s = install_descriptor(&t);
     asm ("ltr %0"::"r"(s):);
 
@@ -162,7 +163,6 @@ void __attribute__((noreturn)) main(){
     
     //test
     initialize_kernel_task();
-
     create_task(50);
 
 
