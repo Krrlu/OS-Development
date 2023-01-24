@@ -7,7 +7,7 @@
 __asm__ ("jmpl  $0x8,$initialize_reg\n");
 
 static tss kernel_tss;
-struct task kernel_task;
+struct task kernel_task; // kernel_task will always be the head of task link
 
 void initialize_reg(){
         asm volatile("mov %%ax, %%ds\n\t"
@@ -154,6 +154,7 @@ void initialize_kernel_task(){
     kernel_task.prev = NULL;
     kernel_task.next = NULL;
     kernel_task.tss_sele = s;
+    kernel_task.busy = 1;
     
 }
 
@@ -161,10 +162,11 @@ void __attribute__((noreturn)) main(){
     // initialize IDT
     initialize_idt();
     
-    //test
     initialize_kernel_task();
     create_task(50);
+    task_switch();
 
+    print_string("\nkernel terminated");
 
     hlt();
     for(;;);

@@ -1,6 +1,6 @@
 #include "print.h"
 #include "isr.h"
-#include "kernel.h"
+#include "task.h"
 /*
     This file contain Interrupt Service Routine
 */
@@ -29,12 +29,12 @@ __attribute__((interrupt)) void interrupt_handler_55(interrupt_frame* frame){
     uint32_t eax;
     uint32_t ebx;
     uint16_t ds;
-    asm volatile ("mov %%eax, %0\n\t"
+    asm  ("mov %%eax, %0\n\t"
                  "mov %%ebx, %1\n\t"
                  "mov %%ds, %2\n\t"
                  "movw %3, %%ax\n\t"
                  "movw %%ax, %%ds"
-        :"=r"(eax), "=r"(ebx), "=r"(ds): "i"(KERNEL_DATA_SEL):"eax","ebx"); 
+        :"=g"(eax), "=g"(ebx), "=g"(ds): "i"(KERNEL_DATA_SEL):"eax"); 
 
      switch(eax)
     {
@@ -47,6 +47,7 @@ __attribute__((interrupt)) void interrupt_handler_55(interrupt_frame* frame){
             break;
 
         case 2:
+            task_switch();
             break;
 
         default:
