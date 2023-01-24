@@ -1,6 +1,6 @@
 #include "print.h"
 #include "isr.h"
-#define hlt() asm volatile("cli\n\t" "hlt\n\t":::)
+#include "kernel.h"
 /*
     This file contain Interrupt Service Routine
 */
@@ -28,19 +28,22 @@ __attribute__((interrupt)) void interrupt_handler_13(interrupt_frame* frame){
 __attribute__((interrupt)) void interrupt_handler_55(interrupt_frame* frame){
     uint32_t eax;
     uint32_t ebx;
-    uint32_t edx;
-    asm volatile("mov %%eax, %0\n\t"
+    uint16_t ds;
+    asm volatile ("mov %%eax, %0\n\t"
                  "mov %%ebx, %1\n\t"
-                 "mov %%edx, %2\n\t"
-        :"=r"(eax), "=r"(ebx), "=r"(edx)::"eax", "ebx","edx"); 
+                 "mov %%ds, %2\n\t"
+                 "movw %3, %%ax\n\t"
+                 "movw %%ax, %%ds"
+        :"=r"(eax), "=r"(ebx), "=r"(ds): "i"(KERNEL_DATA_SEL):"eax","ebx"); 
 
      switch(eax)
     {
         case 0:
-            print_string("do something\n");
+            print_string("System call test\n");
             break;
 
         case 1:
+            print_char((char)(ebx & 0xff));
             break;
 
         case 2:
@@ -49,4 +52,5 @@ __attribute__((interrupt)) void interrupt_handler_55(interrupt_frame* frame){
         default:
             print_string("Error! unknown system call number");
     }
+        asm ("movw %0, %%ds" ::"r"(ds):); 
 }
