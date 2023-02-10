@@ -103,6 +103,6 @@ void task_switch(){
 
     // task switching, jump to the memory contain TSS selector
     // ljmpl = jmp far [memory] 
-    asm ("ljmpl %0"::"m"(avaiable_task->padding):); 
+    asm ("ljmpl *%0"::"m"(avaiable_task->padding):); 
 
 }
