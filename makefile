@@ -1,20 +1,25 @@
 CC = i686-elf-gcc
-LD = i686-elf-ld
-CFLAGS = -c -g -Os -march=i686 -ffreestanding -Wall -I ./include -std=gnu17 -mgeneral-regs-only
+INCLUDE = -I ./include
+CFLAGS = -c -g -Os -march=i686 -ffreestanding -Wall -std=gnu17
+OBJ = $(patsubst %.c,./bin/%.o, $(wildcard *.c))
 
-all: boot.bin kernel.bin
+all: boot kernel
 
-%.o: %.c 
-	$(CC) -c -o $@ $< $(CFLAGS)
+./bin/%.o: %.c 
+	$(CC) -c -o $@ $< $(CFLAGS) $(INCLUDE)
 
-boot.elf: boot.o
-	$(LD) -static -T linker.ld -nostdlib -o boot.elf boot.o
+boot: ./bin/boot.o
+	$(MAKE) -C ./bin boot.bin
 
-kernel.elf: kernel.o print.o mmu.o io.o isr.o task.o
-	$(LD) -static -T kernel.ld -nostdlib -o kernel.elf $^
+interr:
+	$(MAKE) -C ./interrupt
 
-%.bin: %.elf 
+
+kernel: interr $(OBJ)
+	$(MAKE) -C ./bin kernel.bin
+
+%.bin: ./bin/%.elf 
 	objcopy -O binary $< $@
 
 clean:
-	rm *.o *.elf *.bin
+	$(MAKE) -C ./bin clean
